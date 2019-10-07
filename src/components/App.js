@@ -2,6 +2,7 @@ import React from "react";
 import { Header } from "./Header";
 import { ToDoList } from "./ToDoList";
 import { ToDoForm } from "./ToDoForm";
+import ToDoFilter from "./ToDoFilter";
 import "../sass/style.scss";
 import uuid from "uuid/v4";
 import { getRandomTagline } from "../helpers.js";
@@ -10,15 +11,17 @@ import Storage from "../modules/Storage.js";
 export class App extends React.Component {
   constructor(props) {
     super(props);
+
     this.storageKey = "react-todo";
     const old = Storage.get(this.storageKey);
     if (old) {
       this.state = JSON.parse(old);
     } else {
       this.state = {
-        toDoItems: {}
+        toDoItems: {},
+        filter: "undone"
       };
-      // Storage.set(this.storageKey, JSON.stringify(this.state));
+      Storage.set(this.storageKey, JSON.stringify(this.state));
     }
   }
 
@@ -60,14 +63,25 @@ export class App extends React.Component {
       return state;
     });
   };
+  setFilter = filter => {
+    this.setState(state => {
+      state.filter = filter;
+      return state;
+    });
+  };
 
   render() {
     return (
       <div className="container">
         <Header tagline={getRandomTagline()} />
         <ToDoForm addToDo={this.addToDo} />
+        <ToDoFilter
+          activeFilter={this.state.filter}
+          setFilter={this.setFilter}
+        />
         <ToDoList
           items={this.state.toDoItems}
+          filter={this.state.filter}
           updateTodoText={this.updateTodoText}
           toggleToDoDone={this.toggleToDoDone}
           removeToDo={this.removeToDo}
